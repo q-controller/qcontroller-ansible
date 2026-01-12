@@ -1,3 +1,6 @@
 #SPDX-License-Identifier: MIT-0
 ---
-# vars file for qcontroller
+python_dependencies:
+  - grpcio
+  - protobuf
+  - requests

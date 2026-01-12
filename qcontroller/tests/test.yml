@@ -1,6 +1,20 @@
 #SPDX-License-Identifier: MIT-0
 ---
 - hosts: localhost
+  connection: local
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
   remote_user: root
-  roles:
-    - qcontroller
+  tasks:
+    - name: Test qcontroller_vm module - Start VM
+      include_role:
+        name: qcontroller
+      vars:
+        vm_name: "my-vm"
+        vm_state: "running"
+        vm_image: "base"
+        vm_memory: 4096
+    - name: Use VM IP address
+      debug:
+        msg: "VM IP address is {{ vm_result.ipaddresses[0] }}"
+      when: vm_result.ipaddresses is defined and vm_result.ipaddresses | length > 0
