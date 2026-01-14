@@ -1,0 +1,81 @@
+name: Build and Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.25.5"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git unzip curl
+
+      - name: Install Python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install grpcio-tools
+
+      - name: Install protoc
+        run: |
+          curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v21.12/protoc-21.12-linux-x86_64.zip
+          unzip protoc-21.12-linux-x86_64.zip -d ./protoc-temp
+          sudo cp ./protoc-temp/bin/* /usr/bin/
+          sudo cp -r ./protoc-temp/include/* /usr/include/
+          rm -rf ./protoc-temp protoc-21.12-linux-x86_64.zip
+
+      - name: Install protoc-gen-openapi
+        run: |
+          go install github.com/google/gnostic/cmd/protoc-gen-openapi@v0.7.1
+
+      - name: Install OpenAPI Generator
+        run: |
+          curl -LO https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.18.0/openapi-generator-cli-7.18.0.jar
+          sudo mv openapi-generator-cli-7.18.0.jar /usr/local/bin/openapi-generator-cli.jar
+          echo '#!/bin/bash' | sudo tee /usr/local/bin/openapi-generator-cli
+          echo 'java -jar /usr/local/bin/openapi-generator-cli.jar "$@"' | sudo tee -a /usr/local/bin/openapi-generator-cli
+          sudo chmod +x /usr/local/bin/openapi-generator-cli
+
+      - name: Make generate.sh executable
+        run: chmod +x generate.sh
+
+      - name: Run code generation
+        run: ./generate.sh "$(pwd)"/qcontroller/files/generated
+
+      - name: Create release tarball
+        run: |
+          mkdir -p /tmp/release-staging
+          cp -r ./qcontroller /tmp/release-staging/
+          tar -czf qcontroller-ansible-${{ github.event.release.tag_name }}.tar.gz -C /tmp/release-staging .
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: qcontroller-ansible-${{ github.event.release.tag_name }}.tar.gz
