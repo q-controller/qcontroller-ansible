@@ -1,0 +1,6 @@
+#SPDX-License-Identifier: MIT-0
+---
+python_dependencies:
+  - grpcio
+  - protobuf
+  - requests
