@@ -1,14 +1,14 @@
 ---
-- name: Ensure protobuf dependencies are installed
+- name: Ensure controller client dependencies are installed
   pip:
-    requirements: "{{ role_path }}/files/generated/requirements.txt"
-- name: Ensure OpenAPI client dependencies are installed
+    requirements: "{{ role_path }}/files/generated/controller/requirements.txt"
+- name: Ensure protobuf dependencies are installed
   pip:
     name: "{{ python_dependencies }}"
 
 - name: Manage VM via qcontroller
   environment:
-    PYTHONPATH: "{{ role_path }}/files/generated"
+    PYTHONPATH: "{{ role_path }}/files/generated/protos:{{ role_path }}/files/generated/controller"
   qcontroller_vm:
     name: "{{ vm_name }}"
     state: "{{ vm_state | default('present') }}"

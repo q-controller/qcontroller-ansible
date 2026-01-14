@@ -15,14 +15,14 @@ pushd "${TEMPDIR}"
 git clone https://github.com/q-controller/qcontroller.git
 git clone https://github.com/googleapis/googleapis.git
 
-mkdir -p ${OUTPUT_DIR}
+mkdir -p ${OUTPUT_DIR}/protos
 
 # Generate python interfaces for proto definitions
 find qcontroller/src/protos -name "*.proto" -exec python3 -m grpc_tools.protoc \
     -Iqcontroller/src/protos \
     -Igoogleapis \
-    --python_out=${OUTPUT_DIR} \
-    --pyi_out=${OUTPUT_DIR} \
+    --python_out=${OUTPUT_DIR}/protos \
+    --pyi_out=${OUTPUT_DIR}/protos \
     {} \;
 
 # Generate OpenAPI schema
@@ -33,5 +33,7 @@ protoc \
     --openapi_opt=fq_schema_naming=true,default_response=false,title="Controller Service",version=v1,description="This is the OpenAPI schema for Controller gRPC API",naming=json \
     qcontroller/src/protos/services/v1/controller.proto
 
-# Generate OpenAPI client
-openapi-generator-cli generate -g python -i openapi.yaml --additional-properties=generateSourceCodeOnly=false -o ${OUTPUT_DIR}
+find ${OUTPUT_DIR}/protos/* -type d -exec touch {}/__init__.py \;
+
+# Generate OpenAPI client for controller service
+openapi-generator-cli generate -g python -i openapi.yaml --additional-properties=generateSourceCodeOnly=false,packageName=controller_service -o ${OUTPUT_DIR}/controller

@@ -2,7 +2,7 @@ import time
 from typing import Any, Callable
 
 from ansible.module_utils.basic import AnsibleModule
-from openapi_client import (
+from controller_service import (
     ApiClient,
     Configuration,
     ControllerServiceApi,
@@ -12,7 +12,7 @@ from openapi_client import (
     SettingsV1VM,
     ServicesV1Info,
 )
-from openapi_client.exceptions import ServiceException
+from controller_service.exceptions import ServiceException
 from settings.v1.settings_pb2 import VM as Hardware
 from vm.statemachine.v1.statemachine_pb2 import Instance, State
 
