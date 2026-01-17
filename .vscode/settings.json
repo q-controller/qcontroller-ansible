@@ -1,5 +1,6 @@
 {
     "python.analysis.extraPaths": [
-        "./qcontroller/files/generated"
+        "./qcontroller/files/generated/protos",
+        "./qcontroller/files/generated/controller",
     ]
 }
