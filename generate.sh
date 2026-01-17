@@ -37,3 +37,6 @@ find ${OUTPUT_DIR}/protos/* -type d -exec touch {}/__init__.py \;
 
 # Generate OpenAPI client for controller service
 openapi-generator-cli generate -g python -i openapi.yaml --additional-properties=generateSourceCodeOnly=false,packageName=controller_service -o ${OUTPUT_DIR}/controller
+
+# Generate OpenAPI client for image service
+openapi-generator-cli generate -g python -i qcontroller/image-service-openapi.yml --additional-properties=generateSourceCodeOnly=false,packageName=image_service -o ${OUTPUT_DIR}/image

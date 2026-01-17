@@ -6,6 +6,7 @@ vm_memory: 2048
 vm_disk: 40960
 vm_timeout: 60
 vm_force: false
+vm_userdata: ""
 
 # QController server settings
 qcontroller_host: localhost
