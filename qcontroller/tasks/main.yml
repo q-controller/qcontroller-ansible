@@ -2,13 +2,16 @@
 - name: Ensure controller client dependencies are installed
   pip:
     requirements: "{{ role_path }}/files/generated/controller/requirements.txt"
+- name: Ensure image client dependencies are installed
+  pip:
+    requirements: "{{ role_path }}/files/generated/image/requirements.txt"
 - name: Ensure protobuf dependencies are installed
   pip:
     name: "{{ python_dependencies }}"
 
 - name: Manage VM via qcontroller
   environment:
-    PYTHONPATH: "{{ role_path }}/files/generated/protos:{{ role_path }}/files/generated/controller"
+    PYTHONPATH: "{{ role_path }}/files/generated/protos:{{ role_path }}/files/generated/controller:{{ role_path }}/files/generated/image"
   qcontroller_vm:
     name: "{{ vm_name }}"
     state: "{{ vm_state | default('present') }}"
@@ -16,6 +19,8 @@
     memory: "{{ vm_memory | default(2 * 1024) }}"
     disk: "{{ vm_disk | default(40 * 1024) }}"
     image: "{{ vm_image | default(omit) }}"
+    file: "{{ vm_file | default(omit) }}"
+    userdata: "{{ vm_userdata | default('') }}"
     force: "{{ vm_force | default(false) }}"
     timeout: "{{ vm_timeout | default(60) }}"
     qcontroller_host: "{{ qcontroller_host }}"

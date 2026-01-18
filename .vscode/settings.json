@@ -2,5 +2,6 @@
     "python.analysis.extraPaths": [
         "./qcontroller/files/generated/protos",
         "./qcontroller/files/generated/controller",
+        "./qcontroller/files/generated/image",
     ]
 }

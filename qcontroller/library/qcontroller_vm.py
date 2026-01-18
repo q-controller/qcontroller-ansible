@@ -12,6 +12,13 @@ from controller_service import (
     SettingsV1VM,
     ServicesV1Info,
 )
+
+from image_service import (
+    ApiClient as ImageApiClient,
+    Configuration as ImageServiceConfiguration,
+    ImageServiceApi,
+)
+
 from controller_service.exceptions import ServiceException
 from settings.v1.settings_pb2 import VM as Hardware
 from vm.statemachine.v1.statemachine_pb2 import Instance, State
@@ -53,6 +60,7 @@ class Controller:
                 name=instance.id,
                 start=False,
                 image=image,
+                userdata=instance.userdata,
             )
         )
 
@@ -72,6 +80,32 @@ class Controller:
 
     def delete(self, instance_id: str):
         return self.api.controller_service_remove(name=instance_id)
+
+
+class ImageService:
+    api: ImageServiceApi
+
+    def __init__(self, host="localhost", port=8080):
+        self.api = ImageServiceApi(
+            api_client=ImageApiClient(
+                configuration=ImageServiceConfiguration(
+                    host=f"http://{host}:{port}",
+                    ssl_ca_cert=None,
+                    api_key=None,
+                    api_key_prefix=None,
+                )
+            )
+        )
+
+    def upload_image(self, id: str, file_path: str, overwrite: bool = False) -> str:
+        with open(file_path, "rb") as file:
+            if not overwrite:
+                existing_images = self.api.v1_images_get()
+                for img in existing_images.images:
+                    if img.image_id == id:
+                        return img.image_id
+            self.api.v1_images_post(id=id, file=file.read())
+            return id
 
 
 def get_ip_address(controller: Controller, instance_id: str) -> str:
@@ -124,9 +158,12 @@ def run_module():
     module_args = dict(
         name=dict(type="str", required=True),
         image=dict(type="str"),
+        file=dict(type="str"),
         cpus=dict(type="int"),
         memory=dict(type="int"),
         disk=dict(type="int"),
+        userdata=dict(type="str"),
+        overwrite=dict(type="bool", required=False, default=False),
         force=dict(type="bool", required=False, default=False),
         state=dict(
             type="str",
@@ -179,6 +216,7 @@ def run_module():
     delete = False
     try:
         controller = Controller(host=host, port=port)
+        image_registry = ImageService(host=host, port=port)
         info = controller.get(name)
         msg = ""
         if desired_state == "present":
@@ -205,13 +243,20 @@ def run_module():
 
         if create:
             image = params["image"]
+            file = params["file"]
             cpus = params["cpus"]
             memory = params["memory"]
             disk = params["disk"]
+            if file:
+                image = image_registry.upload_image(
+                    image, file, params.get("overwrite", False)
+                )
             controller.create(
                 image=image,
                 instance=Instance(
-                    id=name, hardware=Hardware(cpus=cpus, memory=memory, disk=disk)
+                    id=name,
+                    hardware=Hardware(cpus=cpus, memory=memory, disk=disk),
+                    userdata=params.get("userdata", ""),
                 ),
             )
         if start:
