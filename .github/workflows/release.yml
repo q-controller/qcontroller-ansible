@@ -76,9 +76,9 @@ jobs:
         run: |
           mkdir -p /tmp/release-staging
           cp -r ./qcontroller /tmp/release-staging/
-          tar -czf qcontroller-ansible-${{ github.event.release.tag_name }}.tar.gz -C /tmp/release-staging .
+          tar -czf qcontroller.tar.gz -C /tmp/release-staging .
 
       - name: Upload release asset
         uses: softprops/action-gh-release@v2
         with:
-          files: qcontroller-ansible-${{ github.event.release.tag_name }}.tar.gz
+          files: qcontroller.tar.gz
