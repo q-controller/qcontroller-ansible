@@ -19,6 +19,7 @@
         vm_state: "running"
         vm_image: "cloud-images:ubuntu-noble-20251113"
         vm_file: "/tmp/focal-server-cloudimg-amd64.img"
+        vm_timeout: 600
         vm_userdata: |
           #cloud-config
           ssh_pwauth: true
@@ -28,15 +29,23 @@
               shell: /bin/bash
               groups: sudo
               lock_passwd: false
-              ssh-authorized-keys: []
-          chpasswd:
-            list: |
-              exampleuser:examplepass
-            expire: false
+              plain_text_passwd: examplepass
           packages:
             - qemu-guest-agent
           runcmd:
             - systemctl enable --now qemu-guest-agent
+        vm_network_config: |
+          version: 2
+          ethernets:
+            enp0s2:
+              dhcp4: false
+              dhcp6: false
+              addresses: [192.168.71.83/24]
+              routes:
+                - to: default
+                  via: 192.168.71.3
+              nameservers:
+                addresses: [1.1.1.1, 8.8.8.8]
     - name: Use VM IP address
       debug:
         msg: "VM IP address is {{ vm_result.ipaddresses[0] }}"

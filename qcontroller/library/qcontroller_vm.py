@@ -7,21 +7,18 @@ from controller_service import (
     Configuration,
     ControllerServiceApi,
     ServicesV1CreateRequest,
-    ServicesV1StopRequest,
-    ServicesV1StartRequest,
-    SettingsV1VM,
     ServicesV1Info,
+    ServicesV1StartRequest,
+    ServicesV1StopRequest,
+    SettingsV1VM,
+    VmStatemachineV1CloudInit,
 )
-
-from image_service import (
-    ApiClient as ImageApiClient,
-    Configuration as ImageServiceConfiguration,
-    ImageServiceApi,
-)
-
 from controller_service.exceptions import ServiceException
+from image_service import ApiClient as ImageApiClient
+from image_service import Configuration as ImageServiceConfiguration
+from image_service import ImageServiceApi
 from settings.v1.settings_pb2 import VM as Hardware
-from vm.statemachine.v1.statemachine_pb2 import Instance, State
+from vm.statemachine.v1.statemachine_pb2 import CloudInit, Instance, State
 
 
 class Controller:
@@ -60,7 +57,10 @@ class Controller:
                 name=instance.id,
                 start=False,
                 image=image,
-                userdata=instance.userdata,
+                cloudInit=VmStatemachineV1CloudInit(
+                    userdata=instance.cloudinit.userdata,
+                    networkConfig=instance.cloudinit.network_config,
+                ),
             )
         )
 
@@ -162,7 +162,13 @@ def run_module():
         cpus=dict(type="int"),
         memory=dict(type="int"),
         disk=dict(type="int"),
-        userdata=dict(type="str"),
+        cloud_init=dict(
+            type="dict",
+            options=dict(
+                userdata=dict(type="str", required=False),
+                network_config=dict(type="str", required=False),
+            ),
+        ),
         overwrite=dict(type="bool", required=False, default=False),
         force=dict(type="bool", required=False, default=False),
         state=dict(
@@ -247,6 +253,13 @@ def run_module():
             cpus = params["cpus"]
             memory = params["memory"]
             disk = params["disk"]
+            cloud_init = params.get(
+                "cloud_init",
+                {
+                    "userdata": "",
+                    "network_config": "",
+                },
+            )
             if file:
                 image = image_registry.upload_image(
                     image, file, params.get("overwrite", False)
@@ -256,7 +269,10 @@ def run_module():
                 instance=Instance(
                     id=name,
                     hardware=Hardware(cpus=cpus, memory=memory, disk=disk),
-                    userdata=params.get("userdata", ""),
+                    cloudinit=CloudInit(
+                        userdata=cloud_init.get("userdata", ""),
+                        network_config=cloud_init.get("network_config", ""),
+                    ),
                 ),
             )
         if start:

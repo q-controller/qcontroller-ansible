@@ -20,7 +20,9 @@
     disk: "{{ vm_disk | default(40 * 1024) }}"
     image: "{{ vm_image | default(omit) }}"
     file: "{{ vm_file | default(omit) }}"
-    userdata: "{{ vm_userdata | default('') }}"
+    cloud_init:
+      userdata: "{{ vm_userdata | default('') }}"
+      network_config: "{{ vm_network_config | default('') }}"
     force: "{{ vm_force | default(false) }}"
     timeout: "{{ vm_timeout | default(60) }}"
     qcontroller_host: "{{ qcontroller_host }}"
