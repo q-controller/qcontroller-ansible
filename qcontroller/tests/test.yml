@@ -1,26 +1,28 @@
-#SPDX-License-Identifier: MIT-0
+# SPDX-License-Identifier: MIT-0
 ---
-- hosts: localhost
+- name: Test qcontroller_vm Ansible role
+  hosts: localhost
   connection: local
   vars:
     ansible_python_interpreter: "{{ ansible_playbook_python }}"
   remote_user: root
   tasks:
     - name: Download a sample VM image
-      get_url:
+      ansible.builtin.get_url:
         url: "https://cloud-images.ubuntu.com/noble/20251113/noble-server-cloudimg-amd64.img"
         checksum: "sha256:https://cloud-images.ubuntu.com/noble/20251113/SHA256SUMS"
         dest: "/tmp/focal-server-cloudimg-amd64.img"
+        mode: "0644"
     - name: Test qcontroller_vm module - Start VM
-      include_role:
+      ansible.builtin.include_role:
         name: qcontroller
       vars:
-        vm_name: "my-vm"
-        vm_state: "running"
-        vm_image: "cloud-images:ubuntu-noble-20251113"
-        vm_file: "/tmp/focal-server-cloudimg-amd64.img"
-        vm_timeout: 600
-        vm_userdata: |
+        qcontroller_name: "my-vm"
+        qcontroller_state: "running"
+        qcontroller_image: "cloud-images:ubuntu-noble-20251113"
+        qcontroller_file: "/tmp/focal-server-cloudimg-amd64.img"
+        qcontroller_timeout: 600
+        qcontroller_userdata: |
           #cloud-config
           ssh_pwauth: true
           users:
@@ -34,7 +36,7 @@
             - qemu-guest-agent
           runcmd:
             - systemctl enable --now qemu-guest-agent
-        vm_network_config: |
+        qcontroller_network_config: |
           version: 2
           ethernets:
             enp0s2:
@@ -47,6 +49,6 @@
               nameservers:
                 addresses: [1.1.1.1, 8.8.8.8]
     - name: Use VM IP address
-      debug:
-        msg: "VM IP address is {{ vm_result.ipaddresses[0] }}"
-      when: vm_result.ipaddresses is defined and vm_result.ipaddresses | length > 0
+      ansible.builtin.debug:
+        msg: "VM IP address is {{ qcontroller_result.ipaddresses[0] }}"
+      when: qcontroller_result.ipaddresses is defined and qcontroller_result.ipaddresses | length > 0

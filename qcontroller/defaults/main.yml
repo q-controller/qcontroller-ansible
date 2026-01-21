@@ -1,13 +1,13 @@
-#SPDX-License-Identifier: MIT-0
+# SPDX-License-Identifier: MIT-0
 ---
 # VM resource defaults
-vm_cpus: 2
-vm_memory: 2048
-vm_disk: 40960
-vm_timeout: 60
-vm_force: false
-vm_userdata: ""
-vm_network_config: ""
+qcontroller_cpus: 2
+qcontroller_memory: 2048
+qcontroller_disk: 40960
+qcontroller_timeout: 60
+qcontroller_force: false
+qcontroller_userdata: ""
+qcontroller_network_config: ""
 
 # QController server settings
 qcontroller_host: localhost

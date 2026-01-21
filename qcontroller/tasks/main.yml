@@ -1,34 +1,34 @@
 ---
 - name: Ensure controller client dependencies are installed
-  pip:
+  ansible.builtin.pip:
     requirements: "{{ role_path }}/files/generated/controller/requirements.txt"
 - name: Ensure image client dependencies are installed
-  pip:
+  ansible.builtin.pip:
     requirements: "{{ role_path }}/files/generated/image/requirements.txt"
 - name: Ensure protobuf dependencies are installed
-  pip:
+  ansible.builtin.pip:
     name: "{{ python_dependencies }}"
 
 - name: Manage VM via qcontroller
   environment:
     PYTHONPATH: "{{ role_path }}/files/generated/protos:{{ role_path }}/files/generated/controller:{{ role_path }}/files/generated/image"
   qcontroller_vm:
-    name: "{{ vm_name }}"
-    state: "{{ vm_state | default('present') }}"
-    cpus: "{{ vm_cpus | default(2) }}"
-    memory: "{{ vm_memory | default(2 * 1024) }}"
-    disk: "{{ vm_disk | default(40 * 1024) }}"
-    image: "{{ vm_image | default(omit) }}"
-    file: "{{ vm_file | default(omit) }}"
+    name: "{{ qcontroller_name }}"
+    state: "{{ qcontroller_state | default('present') }}"
+    cpus: "{{ qcontroller_cpus | default(2) }}"
+    memory: "{{ qcontroller_memory | default(2 * 1024) }}"
+    disk: "{{ qcontroller_disk | default(40 * 1024) }}"
+    image: "{{ qcontroller_image | default(omit) }}"
+    file: "{{ qcontroller_file | default(omit) }}"
     cloud_init:
-      userdata: "{{ vm_userdata | default('') }}"
-      network_config: "{{ vm_network_config | default('') }}"
-    force: "{{ vm_force | default(false) }}"
-    timeout: "{{ vm_timeout | default(60) }}"
+      userdata: "{{ qcontroller_userdata | default('') }}"
+      network_config: "{{ qcontroller_network_config | default('') }}"
+    force: "{{ qcontroller_force | default(false) }}"
+    timeout: "{{ qcontroller_timeout | default(60) }}"
     qcontroller_host: "{{ qcontroller_host }}"
     qcontroller_port: "{{ qcontroller_port }}"
   register: qcontroller_result
 
 - name: Set VM result as fact
-  set_fact:
-    vm_result: "{{ qcontroller_result.result }}"
+  ansible.builtin.set_fact:
+    qcontroller_result: "{{ qcontroller_result.result }}"

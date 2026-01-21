@@ -1,4 +1,5 @@
-#SPDX-License-Identifier: MIT-0
+---
+# SPDX-License-Identifier: MIT-0
 galaxy_info:
   author: Nikita Vakula
   description: An Ansible role to manage virtual machines using QController API
