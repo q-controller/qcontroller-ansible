@@ -110,8 +110,8 @@ class ImageService:
 
 def get_ip_address(controller: Controller, instance_id: str) -> str:
     info = controller.get(instance_id)
-    if info and info[0].ipaddresses:
-        return info[0].ipaddresses[0]
+    if info and info[0].runtime_info.ipaddresses:
+        return info[0].runtime_info.ipaddresses[0]
     raise Exception("IP address not found")
 
 
@@ -145,7 +145,7 @@ def serialize_vm_info(vm_info: ServicesV1Info) -> dict:
     return {
         "name": vm_info.name,
         "state": vm_info.state,
-        "ipaddresses": vm_info.ipaddresses,
+        "ipaddresses": vm_info.runtime_info.ipaddresses,
         "cpus": vm_info.details.cpus,
         "memory": vm_info.details.memory,
         "disk": vm_info.details.disk,
