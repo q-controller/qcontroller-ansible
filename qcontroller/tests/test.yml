@@ -9,8 +9,8 @@
   tasks:
     - name: Download a sample VM image
       ansible.builtin.get_url:
-        url: "https://cloud-images.ubuntu.com/noble/20251113/noble-server-cloudimg-amd64.img"
-        checksum: "sha256:https://cloud-images.ubuntu.com/noble/20251113/SHA256SUMS"
+        url: "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
+        checksum: "sha256:https://cloud-images.ubuntu.com/noble/current/SHA256SUMS"
         dest: "/tmp/focal-server-cloudimg-amd64.img"
         mode: "0644"
     - name: Test qcontroller_vm module - Start VM
