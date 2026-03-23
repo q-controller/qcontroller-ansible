@@ -1,7 +1,7 @@
 ---
-- name: Ensure controller client dependencies are installed
+- name: Ensure orchestrator client dependencies are installed
   ansible.builtin.pip:
-    requirements: "{{ role_path }}/files/generated/controller/requirements.txt"
+    requirements: "{{ role_path }}/files/generated/orchestrator/requirements.txt"
 - name: Ensure image client dependencies are installed
   ansible.builtin.pip:
     requirements: "{{ role_path }}/files/generated/image/requirements.txt"
@@ -11,9 +11,10 @@
 
 - name: Manage VM via qcontroller
   environment:
-    PYTHONPATH: "{{ role_path }}/files/generated/protos:{{ role_path }}/files/generated/controller:{{ role_path }}/files/generated/image"
+    PYTHONPATH: "{{ role_path }}/files/generated/protos:{{ role_path }}/files/generated/orchestrator:{{ role_path }}/files/generated/image"
   qcontroller_vm:
     name: "{{ qcontroller_name }}"
+    node: "{{ qcontroller_node }}"
     state: "{{ qcontroller_state | default('present') }}"
     cpus: "{{ qcontroller_cpus | default(2) }}"
     memory: "{{ qcontroller_memory | default(2 * 1024) }}"

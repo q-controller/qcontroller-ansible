@@ -12,3 +12,4 @@ qcontroller_network_config: ""
 # QController server settings
 qcontroller_host: localhost
 qcontroller_port: 8080
+qcontroller_node: local
